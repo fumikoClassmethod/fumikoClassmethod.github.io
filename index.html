@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>UX基礎📖</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      flex-direction: row;
+    }
+    .btn-main {
+      flex: 1 1 0;
+      width: auto;
+      min-width: 120px;
+      font-size: 1.15em;
+      padding: 12px 0;
+      background: linear-gradient(90deg, #4f8cff 0%, #38c9d6 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      transition: background 0.2s;
+      text-align: center;
+      margin: 0;
+    }
+    .btn-main:hover {
+      background: linear-gradient(90deg, #357ae8 0%, #2bb3b3 100%);
+    }
+    .btn-back {
+      background: #e0e0e0 !important;
+      color: #333 !important;
+      font-weight: normal;
+      transition: background 0.2s;
+    }
+    .btn-back:hover {
+      background: #cccccc !important;
+    }
+    @media (max-width: 600px) {
+      .btn-row { flex-direction: column; gap: 10px; }
+      .btn-main, .btn-back { width: 100%; min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UX基礎📖</h1>
+    <div class="progress-bar-bg"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div id="startArea">
+      試験時間（分）: <input type="number" id="examTime" value="50" min="1">
+      <button onclick="startExam()">試験開始</button>
+    </div>
+    <div id="timer"></div>
+    <div id="questionArea" style="display:none;"></div>
+    <div id="result"></div>
+  </div>
+  <script src="questions.js"></script>
+  <script>
+    let timerInterval;
+    let timeLeft = 0;
+    let current = 0;
+    let userAnswers = [];
+    let score = 0;
+    let answerShown = [];
+
+    function startExam() {
+      document.getElementById('result').textContent = "";
+      document.getElementById('startArea').style.display = "none";
+      const examTime = parseInt(document.getElementById('examTime').value);
+      if (isNaN(examTime) || examTime < 1) {
+        alert("1分以上を入力してください。");
+        return;
+      }
+      timeLeft = examTime * 60;
+      current = 0;
+      userAnswers = [];
+      score = 0;
+      answerShown = [];
+      document.getElementById('questionArea').style.display = "";
+      document.getElementById('timer').textContent = `残り時間: ${examTime}:00`;
+      showQuestion();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      document.getElementById('timer').textContent = `残り時間: ${min}:${sec.toString().padStart(2, '0')}`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timer').textContent = "時間切れ！";
+        showResult();
+      }
+    }
+
+    function showQuestion() {
+      if (current >= questions.length) {
+        clearInterval(timerInterval);
+        showResult();
+        return;
+      }
+      // 進捗バー
+      document.getElementById('progressBar').style.width = ((current) / questions.length * 100) + "%";
+      const q = questions[current];
+      const area = document.getElementById('questionArea');
+      area.innerHTML = `<div class="card"><div class="question">Q${current+1} / ${questions.length}<br>${q.question}</div></div>`;
+      const choicesDiv = document.createElement('div');
+      choicesDiv.className = "choices";
+      q.choices.forEach((choice, cidx) => {
+        const id = `q${current}_c${cidx}`;
+        choicesDiv.innerHTML += `
+          <label>
+            <input type="checkbox" name="q${current}" value="${cidx+1}" id="${id}">
+            <span>${choice}</span>
+          </label>
+        `;
+      });
+      area.appendChild(choicesDiv);
+
+      // 選択肢の復元
+      if (userAnswers[current]) {
+        userAnswers[current].forEach(val => {
+          const el = document.querySelector(`input[name="q${current}"][value="${val}"]`);
+          if (el) el.checked = true;
+        });
+      }
+
+      // 「回答を見る」ボタンのみ
+      if (!answerShown[current]) {
+        const btnRow = document.createElement('div');
+        btnRow.className = "btn-row";
+        const btn = document.createElement('button');
+        btn.textContent = "回答を見る";
+        btn.className = "btn-main";
+        btn.onclick = showAnswer;
+        btnRow.appendChild(btn);
+        area.appendChild(btnRow);
+      } else {
+        showAnswer(true); // 復元表示
+      }
+    }
+
+    function showAnswer(isRestore) {
+      // 選択肢を取得
+      const selected = Array.from(document.querySelectorAll(`input[name="q${current}"]:checked`))
+                            .map(el => el.value);
+      userAnswers[current] = selected;
+      answerShown[current] = true;
+      // スコア再計算（常に全問分を再計算）
+      score = 0;
+      for (let i = 0; i < questions.length; i++) {
+        if (userAnswers[i] && arraysEqual((userAnswers[i]||[]).sort(), questions[i].answer.sort())) {
+          score++;
+        }
+      }
+      const area = document.getElementById('questionArea');
+      let html = area.innerHTML;
+      html += `<div class="answer-block">
+        <span class="answer-correct">正解: ${questions[current].answer.join(", ")}</span>
+        <span class="answer-user">あなたの回答: ${selected.length ? selected.join(", ") : "未回答"}</span>
+      </div>`;
+      if (questions[current].explanation) {
+        html += `<div class="explanation">解説: ${questions[current].explanation}</div>`;
+      }
+      if (questions[current].gpt_reason) {
+        html += `<div class="gpt-reason"><strong>ChatGPTの見解:</strong> ${questions[current].gpt_reason}</div>`;
+      }
+      area.innerHTML = html;
+
+      // 「戻る」「次へ」ボタン（横並びで1行、戻るが左）
+      const btnRow = document.createElement('div');
+      btnRow.className = "btn-row";
+      if (current > 0) {
+        const backBtn = document.createElement('button');
+        backBtn.textContent = "戻る";
+        backBtn.className = "btn-main btn-back";
+        backBtn.onclick = function() {
+          current--;
+          showQuestion();
+        };
+        btnRow.appendChild(backBtn);
+      }
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = (current === questions.length - 1) ? "結果を見る" : "次へ";
+      nextBtn.className = "btn-main";
+      nextBtn.onclick = function() {
+        current++;
+        showQuestion();
+      };
+      btnRow.appendChild(nextBtn);
+
+      area.appendChild(btnRow);
+
+      // 進捗バー更新
+      document.getElementById('progressBar').style.width = ((current+1) / questions.length * 100) + "%";
+    }
+
+    function showResult() {
+      document.getElementById('questionArea').style.display = "none";
+      document.getElementById('progressBar').style.width = "100%";
+      let resultHtml = `<h2 style="color:#4f8cff;text-align:center;">診断結果</h2>`;
+      resultHtml += `<div style="font-size:1.3em;text-align:center;margin-bottom:1em;"><strong>あなたの得点: ${score} / ${questions.length}</strong></div>`;
+      questions.forEach((q, idx) => {
+        const selected = userAnswers[idx] || [];
+        const isCorrect = arraysEqual(selected.sort(), q.answer.sort());
+        resultHtml += `<div class="card"><div><strong>Q${idx+1}:</strong> ${isCorrect ? "<span style='color:#1eaf5a'>正解</span>" : "<span style='color:#d00'>不正解</span>"}</div>`;
+        resultHtml += `<div style="margin-top:0.5em;">${q.question}</div>`;
+        resultHtml += `<div class="answer-block">
+          <span class="answer-correct">正解: ${q.answer.join(", ")}</span>
+          <span class="answer-user">あなたの回答: ${selected.length ? selected.join(", ") : "未回答"}</span>
+        </div>`;
+        if (q.explanation) {
+          resultHtml += `<div class="explanation">解説: ${q.explanation}</div>`;
+        }
+        if (q.gpt_reason) {
+          resultHtml += `<div class="gpt-reason"><strong>ChatGPTの見解:</strong> ${q.gpt_reason}</div>`;
+        }
+        resultHtml += `</div>`;
+      });
+      document.getElementById('result').innerHTML = resultHtml;
+    }
+
+    function arraysEqual(a, b) {
+      return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+  </script>
+</body>
+</html>

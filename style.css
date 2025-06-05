@@ -1,0 +1,180 @@
+body {
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+  background: #f4f7fa;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 540px;
+  margin: 40px auto 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 32px 24px 24px 24px;
+}
+h1 {
+  text-align: center;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+  color: #2b3a4b;
+  letter-spacing: 0.05em;
+}
+.progress-bar-bg {
+  width: 100%;
+  background: #e0e7ef;
+  border-radius: 8px;
+  height: 14px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4f8cff 0%, #38c9d6 100%);
+  border-radius: 8px 0 0 8px;
+  transition: width 0.3s;
+}
+#startArea {
+  text-align: center;
+  margin-bottom: 24px;
+}
+#startArea input[type="number"] {
+  font-size: 1.1em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #b0b8c1;
+  width: 60px;
+  margin-right: 8px;
+}
+#startArea button {
+  font-size: 1.1em;
+  padding: 7px 24px;
+  background: #4f8cff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#startArea button:hover {
+  background: #357ae8;
+}
+#timer {
+  text-align: right;
+  font-size: 1.1em;
+  margin-bottom: 12px;
+  color: #4f8cff;
+}
+.card {
+  background: #fafdff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  padding: 24px 18px;
+  margin-bottom: 18px;
+}
+.question {
+  font-size: 1.13em;
+  font-weight: bold;
+  margin-bottom: 1.2em;
+  color: #2b3a4b;
+}
+.choices label {
+  display: block;
+  background: #f0f4fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  font-size: 1.07em;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.2s, border 0.2s;
+  position: relative;
+}
+.choices input[type="checkbox"]:focus + span,
+.choices input[type="radio"]:focus + span {
+  outline: 2px solid #4f8cff;
+}
+.choices input[type="checkbox"]:checked + span,
+.choices input[type="radio"]:checked + span {
+  background: #e6f2ff;
+  border-color: #4f8cff;
+}
+.choices input[type="checkbox"],
+.choices input[type="radio"] {
+  accent-color: #4f8cff;
+  margin-right: 10px;
+  transform: scale(1.2);
+  vertical-align: middle;
+}
+.btn-main {
+  display: block;
+  width: 100%;
+  font-size: 1.15em;
+  padding: 12px 0;
+  background: linear-gradient(90deg, #4f8cff 0%, #38c9d6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.btn-main:hover {
+  background: linear-gradient(90deg, #357ae8 0%, #2bb3b3 100%);
+}
+.answer-block {
+  margin-top: 1.2em;
+  margin-bottom: 1.2em;
+  text-align: center;
+}
+.answer-correct {
+  color: #1eaf5a;
+  font-size: 1.45em;
+  font-weight: bold;
+  margin-bottom: 0.3em;
+  display: block;
+}
+.answer-user {
+  color: #2176d7;
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.3em;
+  display: block;
+}
+.explanation, .gpt-reason {
+  margin-top: 0.7em;
+  font-size: 1em;
+  line-height: 1.6;
+}
+.explanation { color: #555; }
+.gpt-reason { color: #004488; }
+#result {
+  margin-top: 2em;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 24px 18px;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 600px) {
+  .container { padding: 12px 2vw 12px 2vw; }
+  .card, #result { padding: 14px 2vw; }
+  h1 { font-size: 1.1em; }
+  .answer-correct, .answer-user { font-size: 1.1em; }
+}
+.btn-back {
+  background: #e0e0e0 !important;
+  color: #333 !important;
+  border: none;
+  margin-top: 8px;
+  margin-left: 8px;
+  font-weight: normal;
+  transition: background 0.2s;
+}
+.btn-back:hover {
+  background: #cccccc !important;
+}
